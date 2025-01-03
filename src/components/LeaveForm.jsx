@@ -127,7 +127,7 @@ const LeaveForm = ({ currentUser, formSchema }) => {
     e.preventDefault();
     const totalLeaveRequests = [...leaveRequests, formData];
     const managerID = getManagerID();
-    const notification_details = `${formData.fullname}, ${formData.cader} at ${formData.department} applied for leave between ${formData.from} and ${formData.to} \n Kindly attend to it. `
+    const notification_details = `${formData.fullname}, ${formData.cader} in ${formData.department} department applied for leave between ${formData.date_from} and ${formData.date_to} \n Kindly attend to it. `
     add("Leave request from "+ currentUser.fullname, managerID, notification_details)
     toast.success("Leave request submitted, HR Manager will get back to you")
 

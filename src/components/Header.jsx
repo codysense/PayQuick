@@ -22,7 +22,7 @@ const links = [
   ]
   
   export default function Header() {
-    const {currentUser, isAuthenticated} = useAuth()
+    const {currentUser} = useAuth()
     const [userMessages, setUserMessages] = useState([]);
     const shownNotifications = useRef(new Set());
 
@@ -58,7 +58,7 @@ const links = [
         const q =  query(
           userMessagesRef,
           where("recipientID", "==", currentUser._id),
-          // Filter by currentUser ID
+          where("read", "==", false),
           orderBy("timestamp", "desc")
         );
       

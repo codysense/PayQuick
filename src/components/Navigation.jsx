@@ -40,7 +40,8 @@ function Navigation() {
   const navigate = useNavigate();
   const [messageCount, setMessageCount] = useState(0);
   const [userMessages, setUserMessages] = useState([]);
-  const[drawer, setDrawer] = useState(false);
+  const { isOpen, toggleOpen } = useAuth();
+  const [message, setMessage] = useState("");
   const { currentUser, logout } = useAuth();
 
   const authenticator = () => {
@@ -87,7 +88,8 @@ function Navigation() {
     // Query to fetch messages for the current user
     const q = query(
       notificationsRef,
-      where("recipientID", "==", currentUser._id)
+      where("recipientID", "==", currentUser._id),
+      orderBy("timestamp", "desc")
     );
 
     // Real-time subscription to Firestore
@@ -102,16 +104,15 @@ function Navigation() {
     return () => unsubscribe(); // Cleanup subscription on unmount
   }, [currentUser]);
 
-  const markAsRead = async (messageId) => {
-    try {
-      const messageRef = doc(db, "updates", messageId);
-      await updateDoc(messageRef, { read: true });
-    } catch (error) {
-      console.error(error);
-    }
+  // 
+
+  const displayMessage = (message) => {
+    toggleOpen()
+    setMessage(message);
+   
+  
   };
 
-  {console.log(drawer)}
   return (
     <Disclosure as="nav" className="bg-white shadow">
       {({ open }) => (
@@ -177,7 +178,7 @@ function Navigation() {
                   </span>
                 </div>
               </div>
-              {drawer && <Drawer flip={drawer}/>}
+              {isOpen && <Drawer message={message} messages={userMessages} />}
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                 <Menu as="div" className="relative ml-3">
                   <div>
@@ -198,36 +199,24 @@ function Navigation() {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    
                     <MenuItems className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      
                       {messageCount > 0 ? (
                         userMessages.map((message) => (
                           <MenuItem key={message.id}>
                             {({ focus }) => (
-                                <span
-                                  // to={currentUser? "/":"/signin"}
-                                  onClick={()=>setDrawer(true)}
-                                  className={classNames(
-                                    focus ? "bg-gray-100" : "",
-                                    "block px-4 py-2 text-sm text-gray-700 hover:cursor-pointer"
-                                  )}
-                                >
+                              <span
+                                // to={currentUser? "/":"/signin"}
+                                onClick={() => displayMessage(message)}
+                                className={classNames(
+                                  focus ? "bg-gray-100" : "", !message.read? "font-bold":"",
+                                  "block px-4 py-2 text-sm text-gray-700 hover:cursor-pointer"
+                                )}
+                              >
                                 {message.message} -{" "}
                                 {message.timestamp?.toDate().toLocaleString()}
                               </span>
                             )}
                           </MenuItem>
-                         
-                          // <li
-                          //   key={message.id}
-                            
-                          //   style={{ cursor: "pointer" }}
-                          // >
-                          //   {message.message} -{" "}
-                          //   {message.timestamp?.toDate().toLocaleString()}{" "}
-                          //   {/* {message.read ? "(Read)" : "(Unread)"} */}
-                          // </li>
                         ))
                       ) : (
                         <MenuItem>
